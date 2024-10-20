@@ -1,7 +1,7 @@
 ﻿namespace MeetingScheduler;
 
 
-internal record Meeting(string Title, DateTime StartTime, DateTime PlannedEndTime, TimeSpan? ReminderTime);
+internal record Meeting(string Title, DateTime StartTime, DateTime PlannedEndTime, TimeSpan? ReminderTime = null);
 
 
 internal class MeetingManager
