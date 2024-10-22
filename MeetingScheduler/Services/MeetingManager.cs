@@ -1,4 +1,7 @@
-﻿namespace MeetingScheduler;
+﻿using MeetingScheduler.Tools;
+
+
+namespace MeetingScheduler.Services;
 
 
 internal record Meeting(string Title, DateTime StartTime, DateTime PlannedEndTime, TimeSpan? ReminderTime = null);
@@ -25,7 +28,7 @@ internal class MeetingManager
     public void RemoveMeetingAt(DateTime startTime)
     {
         if (!meetings.Remove(startTime))
-            throw new InvalidOperationException("Встреча не существует.");
+            throw new InvalidOperationException("Встреча не найдена.");
     }
 
     public void UpdateMeeting(Meeting oldMeeting, Meeting newMeeting)

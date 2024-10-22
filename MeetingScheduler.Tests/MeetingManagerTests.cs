@@ -1,3 +1,6 @@
+using MeetingScheduler.Services;
+
+
 namespace MeetingScheduler.Tests;
 
 
@@ -9,10 +12,11 @@ public class MeetingManagerTests
     [Fact]
     public void AddNormalMeeting()
     {
-        var meeting = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate = GetValidDateTime();
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(1));
         _manager.AddMeeting(meeting);
 
-        var meetings = _manager.GetMeetings(new DateTime(2024, 10, 22));
+        var meetings = _manager.GetMeetings(startDate.Date);
         Assert.Single(meetings);
         Assert.Equal(meeting.Title, meetings[0].Title);
     }
@@ -20,20 +24,23 @@ public class MeetingManagerTests
     [Fact]
     public void AddLateMeeting()
     {
-        var meeting = new Meeting("Встреча 1", new DateTime(2023, 10, 22, 10, 0, 0), new DateTime(2023, 10, 22, 11, 0, 0));
+        var startDate = DateTime.Now.AddDays(-1);
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(1));
 
         Assert.Throws<ArgumentOutOfRangeException>(() => _manager.AddMeeting(meeting));
-        var meetings = _manager.GetMeetings(new DateTime(2023, 10, 22));
+        var meetings = _manager.GetMeetings(startDate.Date);
         Assert.Empty(meetings);
     }
 
     [Fact]
     public void AddConflictInTheEnd()
     {
-        var meeting1 = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate1 = GetValidDateTime();
+        var meeting1 = new Meeting("Встреча 1", startDate1, startDate1.AddHours(1));
         _manager.AddMeeting(meeting1);
 
-        var meeting2 = new Meeting("Встреча 2", new DateTime(2024, 10, 22, 10, 30, 0), new DateTime(2024, 10, 22, 11, 30, 0));
+        var startDate2 = startDate1.AddMinutes(30);
+        var meeting2 = new Meeting("Встреча 2", startDate2, startDate2.AddHours(1));
 
         CheckConflict(meeting2);
     }
@@ -41,10 +48,12 @@ public class MeetingManagerTests
     [Fact]
     public void AddConflictInTheBegin()
     {
-        var meeting1 = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 11, 0, 0), new DateTime(2024, 10, 22, 12, 0, 0));
+        var startDate1 = GetValidDateTime();
+        var meeting1 = new Meeting("Встреча 1", startDate1, startDate1.AddHours(1));
         _manager.AddMeeting(meeting1);
 
-        var meeting2 = new Meeting("Встреча 2", new DateTime(2024, 10, 22, 10, 30, 0), new DateTime(2024, 10, 22, 11, 30, 0));
+        var startDate2 = startDate1.AddMinutes(-30);
+        var meeting2 = new Meeting("Встреча 2", startDate2, startDate2.AddHours(1));
 
         CheckConflict(meeting2);
     }
@@ -52,10 +61,12 @@ public class MeetingManagerTests
     [Fact]
     public void AddConflictInTheMiddle()
     {
-        var meeting1 = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate1 = GetValidDateTime();
+        var meeting1 = new Meeting("Встреча 1", startDate1, startDate1.AddHours(1));
         _manager.AddMeeting(meeting1);
 
-        var meeting2 = new Meeting("Встреча 2", new DateTime(2024, 10, 22, 10, 15, 0), new DateTime(2024, 10, 22, 10, 45, 0));
+        var startDate2 = startDate1.AddMinutes(15);
+        var meeting2 = new Meeting("Встреча 2", startDate2, startDate2.AddMinutes(30));
 
         CheckConflict(meeting2);
     }
@@ -65,18 +76,20 @@ public class MeetingManagerTests
     [Fact]
     public void RemoveMeeting()
     {
-        var meeting = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate = GetValidDateTime();
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(1));
         _manager.AddMeeting(meeting);
-        _manager.RemoveMeetingAt(meeting.StartTime);
+        _manager.RemoveMeetingAt(startDate);
 
-        var meetings = _manager.GetMeetings(new DateTime(2024, 10, 22));
+        var meetings = _manager.GetMeetings(startDate.Date);
         Assert.Empty(meetings);
     }
 
     [Fact]
     public void RemoveUnexistedMeeting()
     {
-        var meeting = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate = GetValidDateTime();
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(1));
 
         Assert.Throws<InvalidOperationException>(() => _manager.RemoveMeetingAt(meeting.StartTime));
     }
@@ -86,13 +99,15 @@ public class MeetingManagerTests
     [Fact]
     public void UpdateMeeting()
     {
-        var meeting = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate= GetValidDateTime();
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(1));
         _manager.AddMeeting(meeting);
 
-        var updatedMeeting = new Meeting("Обновленная встреча", new DateTime(2024, 10, 22, 11, 0, 0), new DateTime(2024, 10, 22, 12, 0, 0));
+        startDate = startDate.AddHours(1);
+        var updatedMeeting = new Meeting("Обновленная встреча", startDate, startDate.AddHours(1));
         _manager.UpdateMeeting(meeting, updatedMeeting);
 
-        var meetings = _manager.GetMeetings(new DateTime(2024, 10, 22));
+        var meetings = _manager.GetMeetings(startDate.Date);
         Assert.Single(meetings);
         Assert.Equal(updatedMeeting.Title, meetings[0].Title);
     }
@@ -100,16 +115,20 @@ public class MeetingManagerTests
     [Fact]
     public void UpdateMeetingWithConflicted()
     {
-        var meeting1 = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
-        var meeting2 = new Meeting("Встреча 2", new DateTime(2024, 10, 22, 11, 0, 0), new DateTime(2024, 10, 22, 12, 0, 0));
+        var startDate1 = GetValidDateTime();
+        var startDate2 = startDate1.AddHours(1);
+        var conflictDate = startDate1.AddHours(0.5);
+
+        var meeting1 = new Meeting("Встреча 1", startDate1, startDate1.AddHours(1));
+        var meeting2 = new Meeting("Встреча 2", startDate2, startDate2.AddHours(1));
         _manager.AddMeeting(meeting1);
         _manager.AddMeeting(meeting2);
 
-        var meeting1_updated = new Meeting("Встреча 1 обновленная", new DateTime(2024, 10, 22, 10, 30, 0), new DateTime(2024, 10, 22, 11, 30, 0));
+        var meeting1_updated = new Meeting("Встреча 1 обновленная", conflictDate, conflictDate.AddHours(1));
 
         CheckConflict(() => _manager.UpdateMeeting(meeting1, meeting1_updated));
 
-        var meetings = _manager.GetMeetings(new DateTime(2024, 10, 22));
+        var meetings = _manager.GetMeetings(startDate1.Date);
         Assert.Equal(2, meetings.Count);
         Assert.Equal(meeting1.Title, meetings[0].Title);
         Assert.Equal(meeting2.Title, meetings[1].Title);
@@ -120,23 +139,36 @@ public class MeetingManagerTests
     [Fact]
     public void GetMeetings()
     {
-        var meeting1 = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
-        var meeting2 = new Meeting("Встреча 2", new DateTime(2024, 10, 22, 11, 0, 0), new DateTime(2024, 10, 22, 12, 0, 0));
-        _manager.AddMeeting(meeting1);
-        _manager.AddMeeting(meeting2);
+        var sameDay1 = GetValidDateTime();
+        var sameDay2 = sameDay1.AddHours(2);
+        var nextDay3 = sameDay1.AddDays(1);
 
-        var meetings = _manager.GetMeetings(new DateTime(2024, 10, 22));
-        Assert.Equal(2, meetings.Count);
+        var sameDayMeeting1 = new Meeting("Встреча 1", sameDay1, sameDay1.AddHours(1));
+        var sameDayMeeting2 = new Meeting("Встреча 2", sameDay2, sameDay2.AddHours(1));
+        var nextDayMeeting = new Meeting("Встреча 3", nextDay3, nextDay3.AddHours(1));
+        _manager.AddMeeting(sameDayMeeting1);
+        _manager.AddMeeting(sameDayMeeting2);
+        _manager.AddMeeting(nextDayMeeting);
+
+        var sameDayMeetings = _manager.GetMeetings(sameDay1.Date);
+        Assert.Equal(2, sameDayMeetings.Count);
+        Assert.Equal(sameDayMeeting1, sameDayMeetings[0]);
+        Assert.Equal(sameDayMeeting2, sameDayMeetings[1]);
+
+        var nextDayMeetings = _manager.GetMeetings(nextDay3.Date);
+        Assert.Single(nextDayMeetings);
+        Assert.Equal(nextDayMeeting, nextDayMeetings[0]);
     }
 
     [Fact]
     public void ExportMeetingsToFile()
     {
-        var meeting = new Meeting("Встреча 1", new DateTime(2024, 10, 22, 10, 0, 0), new DateTime(2024, 10, 22, 11, 0, 0));
+        var startDate = GetValidDateTime();
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(1));
         _manager.AddMeeting(meeting);
 
         string filePath = Path.GetTempFileName();
-        _manager.ExportMeetingsToFile(new DateTime(2024, 10, 22), filePath);
+        _manager.ExportMeetingsToFile(startDate.Date, filePath);
 
         var fileContent = File.ReadAllText(filePath);
         Assert.Contains($"{meeting.Title}: {meeting.StartTime} - {meeting.PlannedEndTime}", fileContent);
@@ -150,10 +182,13 @@ public class MeetingManagerTests
     {
         CheckConflict(() => _manager.AddMeeting(meeting2));
     }    
+
     private void CheckConflict(Action action)
     {
         var exception = Assert.Throws<InvalidOperationException>(action);
         Assert.Contains("конфликт", exception.Message);
     }
+
+    private DateTime GetValidDateTime() => DateTime.Now.AddDays(1).Date.AddHours(12);
     #endregion
 }

@@ -1,4 +1,8 @@
+﻿using MeetingScheduler.Services;
 ﻿namespace MeetingScheduler;
+
+
+namespace MeetingScheduler;
 
 
 internal class Program
