@@ -147,7 +147,7 @@ public class MeetingManagerTests
     }
     #endregion
 
-    #region Other
+    #region Read
     [Fact]
     public void GetMeetings()
     {
@@ -184,6 +184,20 @@ public class MeetingManagerTests
 
         var fileContent = File.ReadAllText(filePath);
         Assert.Contains($"{meeting.Title}: {meeting.StartTime} - {meeting.PlannedEndTime}", fileContent);
+
+        File.Delete(filePath);
+    }
+
+    [Fact]
+    public void ExportEmptyMeetingsToFile()
+    {
+        var startDate = GetValidDateTime();
+
+        string filePath = Path.GetTempFileName();
+        _manager.ExportMeetingsToFile(startDate.Date, filePath);
+
+        var fileContent = File.ReadAllText(filePath);
+        Assert.Empty(fileContent);
 
         File.Delete(filePath);
     }
