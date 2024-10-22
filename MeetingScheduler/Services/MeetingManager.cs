@@ -48,9 +48,28 @@ internal class MeetingManager
 
     public List<Meeting> GetMeetings(DateTime date)
     {
-        return meetings.Values
-            .Where(m => m.StartTime.Date == date.Date)
-            .ToList();
+        var startDate = date.Date;
+        var endDate = startDate.AddDays(1);
+
+        var startIndex = meetings.BinarySearch(date);
+        var endIndex = meetings.BinarySearch(endDate);
+
+        if (startIndex < 0)
+            startIndex = ~startIndex;
+
+        if (endIndex < 0)
+            endIndex = ~endIndex;
+
+        var count = endIndex - startIndex; //endIndex не входит в диапазон 
+        if (count <= 0)
+            return [];
+
+        var result = new List<Meeting>(count);
+
+        for (var i = startIndex; i < endIndex; i++)
+            result.Add(meetings.GetValueAtIndex(i));
+
+        return result;
     }
 
     public void ExportMeetingsToFile(DateTime date, string filePath)
