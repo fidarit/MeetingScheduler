@@ -21,6 +21,9 @@ internal class MeetingManager : IMeetingManager
     {
         if (meeting.StartTime < DateTime.Now)
             throw new ArgumentOutOfRangeException(nameof(meeting.StartTime), "Встречи всегда планируются только на будущее время.");
+        
+        if (meeting.StartTime > meeting.PlannedEndTime)
+            throw new ArgumentOutOfRangeException(nameof(meeting.PlannedEndTime), "Время окончания встречи не может быть раньше времени начала.");
 
         if (MeetingHasConflicts(meeting))
             throw new InvalidOperationException("Встреча конфликтует с существующей встречей.");

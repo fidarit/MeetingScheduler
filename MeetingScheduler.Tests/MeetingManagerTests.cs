@@ -20,6 +20,17 @@ public class MeetingManagerTests
         var meetings = _manager.GetMeetings(startDate.Date);
         Assert.Single(meetings);
         Assert.Equal(meeting.Title, meetings[0].Title);
+    }    
+    
+    [Fact]
+    public void AddMeetingWithEarlyEndTime()
+    {
+        var startDate = GetValidDateTime();
+        var meeting = new Meeting("Встреча 1", startDate, startDate.AddHours(-1));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => _manager.AddMeeting(meeting));
+        var meetings = _manager.GetMeetings(startDate.Date);
+        Assert.Empty(meetings);
     }
     
     [Fact]
