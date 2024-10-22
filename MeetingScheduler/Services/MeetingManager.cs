@@ -46,13 +46,26 @@ internal class MeetingManager
         }
     }
 
+    /// <summary>
+    /// Возвращает встречи за указанную дату (время не учитывается)
+    /// </summary>
     public List<Meeting> GetMeetings(DateTime date)
     {
         var startDate = date.Date;
         var endDate = startDate.AddDays(1);
 
-        var startIndex = meetings.BinarySearch(date);
-        var endIndex = meetings.BinarySearch(endDate);
+        return GetMeetings(startDate, endDate);
+    }
+
+    /// <summary>
+    /// Возвращает встречи в указанном промежутке времени
+    /// </summary>
+    /// <param name="from">Дата\время, входит в промежуток</param>
+    /// <param name="to">Дата\время, не входит в промежуток</param>
+    public List<Meeting> GetMeetings(DateTime from, DateTime to)
+    {
+        var startIndex = meetings.BinarySearch(from);
+        var endIndex = meetings.BinarySearch(to);
 
         if (startIndex < 0)
             startIndex = ~startIndex;

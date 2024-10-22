@@ -141,7 +141,7 @@ public class MeetingManagerTests
     {
         var sameDay1 = GetValidDateTime();
         var sameDay2 = sameDay1.AddHours(2);
-        var nextDay3 = sameDay1.AddDays(1);
+        var nextDay3 = sameDay1.AddDays(1).Date;
 
         var sameDayMeeting1 = new Meeting("Встреча 1", sameDay1, sameDay1.AddHours(1));
         var sameDayMeeting2 = new Meeting("Встреча 2", sameDay2, sameDay2.AddHours(1));
