@@ -1,4 +1,5 @@
-﻿using MeetingScheduler.Services;
+﻿using MeetingScheduler.Models;
+using MeetingScheduler.Services;
 using static MeetingScheduler.Tools.ConsoleTools;
 
 
@@ -10,6 +11,9 @@ internal class Program
     static void Main(string[] args)
     {
         var manager = new MeetingManager();
+        using var notificationSystem = new NotificationSystem(manager);
+        notificationSystem.OnNotification += (_, e) => Console.WriteLine($"Напоминание: Встреча '{e.Meeting.Title}' начнется в {e.Meeting.StartTime}");
+
         bool running = true;
 
         while (running)

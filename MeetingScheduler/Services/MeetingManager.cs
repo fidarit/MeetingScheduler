@@ -13,6 +13,10 @@ internal class MeetingManager : IMeetingManager
     /// </summary>
     private readonly SortedList<DateTime, Meeting> meetings = [];
 
+    public event EventHandler<MeetingEventArgs>? MeetingAdded;
+    public event EventHandler<MeetingEventArgs>? MeetingRemoved;
+    public event EventHandler<MeetingUpdateEventArgs>? MeetingUpdated;
+
     public void AddMeeting(Meeting meeting)
     {
         if (meeting.StartTime < DateTime.Now)
@@ -22,12 +26,17 @@ internal class MeetingManager : IMeetingManager
             throw new InvalidOperationException("Встреча конфликтует с существующей встречей.");
 
         meetings.Add(meeting.StartTime, meeting);
+
+        MeetingAdded?.Invoke(this, new(meeting));
     }
 
     public void RemoveMeetingAt(DateTime startTime)
     {
-        if (!meetings.Remove(startTime))
+        if (!meetings.TryGetValue(startTime, out var meeting))
             throw new InvalidOperationException("Встреча не найдена.");
+
+        meetings.Remove(startTime);
+        MeetingRemoved?.Invoke(this, new(meeting));
     }
 
     public void UpdateMeeting(Meeting oldMeeting, Meeting newMeeting)
@@ -37,6 +46,8 @@ internal class MeetingManager : IMeetingManager
         try
         {
             AddMeeting(newMeeting);
+
+            MeetingUpdated?.Invoke(this, new(oldMeeting, newMeeting));
         }
         catch (InvalidOperationException)
         {

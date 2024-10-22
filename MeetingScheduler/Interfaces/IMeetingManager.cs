@@ -4,6 +4,10 @@ namespace MeetingScheduler.Interfaces
 {
     internal interface IMeetingManager
     {
+        event EventHandler<MeetingEventArgs>? MeetingAdded;
+        event EventHandler<MeetingEventArgs>? MeetingRemoved;
+        event EventHandler<MeetingUpdateEventArgs>? MeetingUpdated;
+
         void AddMeeting(Meeting meeting);
 
         void ExportMeetingsToFile(DateTime date, string filePath);
