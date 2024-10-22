@@ -1,13 +1,12 @@
-﻿using MeetingScheduler.Tools;
+﻿using MeetingScheduler.Interfaces;
+using MeetingScheduler.Models;
+using MeetingScheduler.Tools;
 
 
 namespace MeetingScheduler.Services;
 
 
-internal record Meeting(string Title, DateTime StartTime, DateTime PlannedEndTime, TimeSpan? ReminderTime = null);
-
-
-internal class MeetingManager
+internal class MeetingManager : IMeetingManager
 {
     /// <summary>
     /// StartTime: Meeting
@@ -46,9 +45,6 @@ internal class MeetingManager
         }
     }
 
-    /// <summary>
-    /// Возвращает встречи за указанную дату (время не учитывается)
-    /// </summary>
     public List<Meeting> GetMeetings(DateTime date)
     {
         var startDate = date.Date;
@@ -57,11 +53,6 @@ internal class MeetingManager
         return GetMeetings(startDate, endDate);
     }
 
-    /// <summary>
-    /// Возвращает встречи в указанном промежутке времени
-    /// </summary>
-    /// <param name="from">Дата\время, входит в промежуток</param>
-    /// <param name="to">Дата\время, не входит в промежуток</param>
     public List<Meeting> GetMeetings(DateTime from, DateTime to)
     {
         var startIndex = meetings.BinarySearch(from);
